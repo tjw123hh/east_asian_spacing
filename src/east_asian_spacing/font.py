@@ -36,6 +36,7 @@ class Font(object):
         self._ttglyphset = None
         self._units_per_em = None
         self._vertical_font = None
+        self._vert_variant_glyph_ids = None
 
     def _clone_base(self):
         font = Font()
@@ -389,6 +390,27 @@ class Font(object):
 
     def has_gsub_feature(self, feature_tag):
         return Font._has_tttable_feature(self.tttable('GSUB'), feature_tag)
+
+    def _collect_vert_variant_glyph_ids(self):
+        tttable = self.tttable('GSUB')
+        if not tttable or not tttable.table or not tttable.table.FeatureList:
+            return set()
+        ttfont = self.ttfont
+        glyph_ids = set()
+        for feature_record in tttable.table.FeatureList.FeatureRecord:
+            if feature_record.FeatureTag != 'vert':
+                continue
+            for lookup_idx in feature_record.Feature.LookupListIndex:
+                lookup = tttable.table.LookupList.Lookup[lookup_idx]
+                for subtable in lookup.SubTable:
+                    for name_to in subtable.mapping.values():
+                        glyph_ids.add(ttfont.getGlyphID(name_to))
+        return glyph_ids
+
+    def is_vert_variant(self, glyph_id: int) -> bool:
+        if self._vert_variant_glyph_ids is None:
+            self._vert_variant_glyph_ids = self._collect_vert_variant_glyph_ids()
+        return glyph_id in self._vert_variant_glyph_ids
 
     def gpos_ottable(self, create=False) -> otTables.GPOS:
         tttable = self.tttable('GPOS')

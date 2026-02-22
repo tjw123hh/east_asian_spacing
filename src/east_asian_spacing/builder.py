@@ -87,8 +87,8 @@ class Builder(object):
     def _config_for_log(config: Config):
         if config.use_ink_bounds:
             return 'use_ink'
-        if config.language:
-            return f'lang={config.language}'
+        if config.languages:
+            return f'lang={config.languages}'
         return 'lang=auto'
 
     async def build(self):
@@ -237,9 +237,17 @@ class Builder(object):
                             help="comment level for the glyph list")
         parser.add_argument("-l",
                             "--language",
-                            help="language if the font is language-specific,"
+                            help="This is the legacy version of `-L/-languages`."
+                            " language if the font is language-specific,"
                             " or a comma separated list of languages"
                             " for a font collection (TTC)")
+        parser.add_argument("-L",
+                            "--languages",
+                            help="language or a comma separated list of languages"
+                            " for the font."
+                            " For a font collection (TTC), use a comma separated"
+                            " list of languages per font, with fonts separated by"
+                            " semicolons (e.g. 'JAN,ZHS;ZHT,ZHH')")
         parser.add_argument("--no-monospace",
                             action="store_true",
                             help="Skip ASCII-monospace fonts")
@@ -277,15 +285,18 @@ class Builder(object):
                 args.glyph_out.mkdir(exist_ok=True, parents=True)
         for input in Builder.expand_paths(args.inputs):
             font = Font.load(input)
+            if args.language and not args.languages:
+                assert ';' not in args.language, "Use `-L` instead of `-l` to use the new syntax."
+                args.languages = args.language.replace(',', ';')
             if font.is_collection:
                 config = Config.for_collection(font,
-                                               languages=args.language,
+                                               languages=args.languages,
                                                indices=args.index)
             else:
                 config = Config.default
-                if args.language:
-                    assert ',' not in args.language
-                    config = config.for_language(args.language)
+                if args.languages:
+                    assert ';' not in args.languages
+                    config = config.for_languages(args.languages)
             if args.no_monospace:
                 config = config.with_skip_monospace_ascii(True)
             if args.em is not None:
