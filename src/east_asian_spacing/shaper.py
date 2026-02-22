@@ -198,8 +198,10 @@ class GlyphDataSet(object):
     to ease `set`-like operations such as unions or subtractions.
     """
 
-    def __init__(self, glyphs: Optional[Union[GlyphDataSet, ShapeResult, Iterable[GlyphData]]] = None):
-        self._texts_by_glyph = {}   # type: Dict[GlyphData, Set[str]]
+    def __init__(self,
+                 glyphs: Optional[Union[GlyphDataSet, ShapeResult,
+                                        Iterable[GlyphData]]] = None):
+        self._texts_by_glyph = {}  # type: Dict[GlyphData, Set[str]]
         self |= glyphs
 
     def __eq__(self, other):
@@ -244,7 +246,8 @@ class GlyphDataSet(object):
         return set(self.glyph_ids)
 
     def isdisjoint(self, other: GlyphDataSet):
-        return self._texts_by_glyph.keys().isdisjoint(other._texts_by_glyph.keys())
+        return self._texts_by_glyph.keys().isdisjoint(
+            other._texts_by_glyph.keys())
 
     def glyph_id_and_glyph(self) -> Iterator[Tuple[int, GlyphData]]:
         return ((glyph.glyph_id, glyph) for glyph in self._texts_by_glyph)
@@ -258,7 +261,11 @@ class GlyphDataSet(object):
 
     def __isub__(self, other: GlyphDataSet):
         assert type(other) is GlyphDataSet
-        self._texts_by_glyph = {glyph: self._texts_by_glyph[glyph] for glyph in self._texts_by_glyph.keys() - other._texts_by_glyph.keys()}
+        self._texts_by_glyph = {
+            glyph: self._texts_by_glyph[glyph]
+            for glyph in self._texts_by_glyph.keys() -
+            other._texts_by_glyph.keys()
+        }
         return self
 
     def __ior__(self, other):
@@ -267,7 +274,8 @@ class GlyphDataSet(object):
 
         if isinstance(other, (GlyphDataSet, ShapeResult)):
             for glyph in other:
-                self._texts_by_glyph.setdefault(glyph, set()).update(other.get_texts(glyph))
+                self._texts_by_glyph.setdefault(glyph, set()).update(
+                    other.get_texts(glyph))
             return self
 
         for glyph in other:

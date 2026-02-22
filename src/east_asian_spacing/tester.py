@@ -165,19 +165,18 @@ class EastAsianSpacingTester(object):
                     (glyph_sets.left.glyph_id_set,
                      glyph_sets.right.glyph_id_set) if glyph_sets else None,
                     language,
-                )
-            )
+                ))
 
             op_op_tests = ShapeTest.create_list(
                 font, itertools.product(opening, opening), 1)
             coros.append(
                 self.assert_trim(
                     op_op_tests,
-                    (glyph_sets.right.glyph_id_set | glyph_sets.na_right.glyph_id_set,
+                    (glyph_sets.right.glyph_id_set
+                     | glyph_sets.na_right.glyph_id_set,
                      glyph_sets.right.glyph_id_set) if glyph_sets else None,
                     language,
-                )
-            )
+                ))
 
         # Run tests without using `asyncio.gather`
         # to avoid too many open files when using subprocesses.
@@ -186,7 +185,8 @@ class EastAsianSpacingTester(object):
         tests = tuple(itertools.chain(*tests))
         return tests
 
-    async def assert_trim(self, tests: Iterable[ShapeTest],
+    async def assert_trim(self,
+                          tests: Iterable[ShapeTest],
                           glyph_id_sets: Optional[Tuple[Set[int]]],
                           language: Optional[str] = None):
         font = self.font

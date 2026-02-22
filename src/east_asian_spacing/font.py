@@ -403,13 +403,16 @@ class Font(object):
             for lookup_idx in feature_record.Feature.LookupListIndex:
                 lookup = tttable.table.LookupList.Lookup[lookup_idx]
                 for subtable in lookup.SubTable:
+                    if lookup.LookupType == 7:  # ExtensionSubst
+                        subtable = subtable.ExtSubTable
                     for name_to in subtable.mapping.values():
                         glyph_ids.add(ttfont.getGlyphID(name_to))
         return glyph_ids
 
     def is_vert_variant(self, glyph_id: int) -> bool:
         if self._vert_variant_glyph_ids is None:
-            self._vert_variant_glyph_ids = self._collect_vert_variant_glyph_ids()
+            self._vert_variant_glyph_ids = self._collect_vert_variant_glyph_ids(
+            )
         return glyph_id in self._vert_variant_glyph_ids
 
     def gpos_ottable(self, create=False) -> otTables.GPOS:

@@ -83,7 +83,8 @@ class Config(object):
             if script == 'hani' and tag in ["JAN ", "ZHS ", "ZHT ", "ZHH "]
         } or [None]
         name = font.debug_name(16, 1)
-        return self.for_font_name(name, font.is_vertical).with_languages(default_languages)
+        return self.for_font_name(
+            name, font.is_vertical).with_languages(default_languages)
 
     def for_font_name(self, name, is_vertical):
         # Noto has ASCII-mono vaiations. It is intended for code and grid-like
@@ -108,7 +109,8 @@ class Config(object):
         if isinstance(languages, str):
             languages = languages.split(",")
         languages = {language for language in languages if language}
-        assert languages is None or all(language in ["JAN", "ZHS", "ZHT", "ZHH"] for language in languages)
+        assert languages is None or all(
+            language in ["JAN", "ZHS", "ZHT", "ZHH"] for language in languages)
         if languages == self.languages:
             return self
         clone = self.clone()
@@ -181,7 +183,10 @@ class CollectionConfig(Config):
             indices = (int(i) for i in indices.split(","))
         if list_of_languages:
             if isinstance(list_of_languages, str):
-                list_of_languages = [languages or None for languages in list_of_languages.split(';')]
+                list_of_languages = [
+                    languages or None
+                    for languages in list_of_languages.split(';')
+                ]
             if len(list_of_languages) == 1:
                 return itertools.zip_longest(indices, (),
                                              fillvalue=list_of_languages[0])

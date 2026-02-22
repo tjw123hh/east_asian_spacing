@@ -71,7 +71,8 @@ class GlyphSets(object):
 
     @property
     def _glyph_data_sets(self):
-        return (self.left, self.right, self.middle, self.space, self.na_left, self.na_right)
+        return (self.left, self.right, self.middle, self.space, self.na_left,
+                self.na_right)
 
     @property
     def _name_and_glyph_data_sets(self):
@@ -81,17 +82,22 @@ class GlyphSets(object):
 
     @property
     def glyph_id_set(self) -> Set[int]:
-        return {glyph.glyph_id for glyph_data_set in self._glyph_data_sets for glyph in glyph_data_set}
+        return {
+            glyph.glyph_id
+            for glyph_data_set in self._glyph_data_sets
+            for glyph in glyph_data_set
+        }
 
     def glyphs_are_disjoint(self) -> bool:
-        return all(a.isdisjoint(b) for a, b in itertools.combinations(self._glyph_data_sets, 2))
+        return all(
+            a.isdisjoint(b)
+            for a, b in itertools.combinations(self._glyph_data_sets, 2))
 
     def _to_str(self, glyph_ids=False):
         name_and_glyph_data_sets = self._name_and_glyph_data_sets
         # Filter out empty glyph sets.
         name_and_glyph_data_sets = filter(
-            lambda name_and_glyph: name_and_glyph[1],
-            name_and_glyph_data_sets)
+            lambda name_and_glyph: name_and_glyph[1], name_and_glyph_data_sets)
         if glyph_ids:
             strs = (f'{name}={sorted(glyphs.glyph_ids)}'
                     for name, glyphs in name_and_glyph_data_sets)
@@ -109,21 +115,19 @@ class GlyphSets(object):
             if not comment:
                 return str(glyph.glyph_id)
             if comment <= 1:
-                comment_str = ', '.join(
-                    f'U+{ord(t):04X} {t}' for t in sorted(texts) if t
-                )
+                comment_str = ', '.join(f'U+{ord(t):04X} {t}'
+                                        for t in sorted(texts) if t)
             else:
-                comment_str = ', '.join(
-                    f'{glyph} U+{ord(t):04X} {t}' for t in sorted(texts) if t
-                )
-            return f'{glyph.glyph_id} # {comment_str}' if comment_str else str(glyph.glyph_id)
+                comment_str = ', '.join(f'{glyph} U+{ord(t):04X} {t}'
+                                        for t in sorted(texts) if t)
+            return f'{glyph.glyph_id} # {comment_str}' if comment_str else str(
+                glyph.glyph_id)
 
         for name, glyph_data_set in self._name_and_glyph_data_sets:
             output.write(f'# {prefix}{name}\n')
             glyph_strs = (
                 str_from_glyph(g, glyph_data_set.get_texts(g))
-                for g in sorted(glyph_data_set, key=lambda g: g.glyph_id)
-            )
+                for g in sorted(glyph_data_set, key=lambda g: g.glyph_id))
             output.write(separator.join(glyph_strs))
             output.write('\n')
 
@@ -131,8 +135,7 @@ class GlyphSets(object):
             output.write(f'# {prefix}filtered\n')
             filtered_strs = (
                 f'# {str_from_glyph(g, self._filtered.get_texts(g))}'
-                for g in sorted(self._filtered, key=lambda g: g.glyph_id)
-            )
+                for g in sorted(self._filtered, key=lambda g: g.glyph_id))
             output.write(separator.join(filtered_strs))
             output.write('\n')
 
@@ -180,7 +183,8 @@ class GlyphSets(object):
     def ifilter_vert_variants(self, font: Font):
         # Left/right in vertical should apply only if they have `vert` glyphs.
         # YuGothic/UDGothic doesn't have 'vert' glyphs for U+2018/201C/301A/301B.
-        is_vert_variant_glyph_data = lambda glyph: font.is_vert_variant(glyph.glyph_id)
+        is_vert_variant_glyph_data = lambda glyph: font.is_vert_variant(
+            glyph.glyph_id)
         self.left.ifilter(is_vert_variant_glyph_data, self._filtered)
         self.right.ifilter(is_vert_variant_glyph_data, self._filtered)
 
@@ -194,7 +198,8 @@ class GlyphSets(object):
             logger.warning('Skipped because proportional CJK: "%s"', font)
             return
 
-        coros = (self.by_language(font, config, language) for language in config.languages)
+        coros = (self.by_language(font, config, language)
+                 for language in config.languages)
         results = await asyncio.gather(*coros)
 
         for result in results:
@@ -269,7 +274,7 @@ class GlyphSets(object):
 
     @staticmethod
     async def by_language(font, config, language):
-        assert language in ["JAN", "ZHS", "ZHT", "ZHH"]
+        assert language in {"JAN", "ZHS", "ZHT", "ZHH"}
 
         right = config.cjk_opening | config.quotes_opening
         left = config.cjk_closing | config.quotes_closing
@@ -294,15 +299,16 @@ class GlyphSets(object):
         if language != "ZHS" and not font.is_vertical:
             middle |= config.cjk_colon_semicolon
 
-        shaper = GlyphSets._ShapeHelper(font, log_name=f"by_language: {language}")
+        shaper = GlyphSets._ShapeHelper(font,
+                                        log_name=f"by_language: {language}")
 
         coros = [
-                shaper.shape(left, language),
-                shaper.shape(right, language),
-                shaper.shape(middle, language),
-                shaper.shape(space, language),
-                shaper.shape(na_left, language, fullwidth=False),
-                shaper.shape(na_right, language, fullwidth=False),
+            shaper.shape(left, language),
+            shaper.shape(right, language),
+            shaper.shape(middle, language),
+            shaper.shape(space, language),
+            shaper.shape(na_left, language, fullwidth=False),
+            shaper.shape(na_right, language, fullwidth=False),
         ]
 
         # In vertical flow, add colon/semicolon to middle if they have
@@ -332,9 +338,7 @@ class GlyphSets(object):
             assert glyph_sets.glyphs_are_disjoint()
             self.left, self.right, self.middle, self.space, self.na_left, self.na_right = (
                 tuple(font.glyph_names(sorted(glyphs.glyph_id_set)))
-                for glyphs in (glyph_sets.left, glyph_sets.right,
-                               glyph_sets.middle, glyph_sets.space,
-                               glyph_sets.na_left, glyph_sets.na_right))
+                for glyphs in glyph_sets._glyph_data_sets)
 
             em = font.fullwidth_advance
             # When `em` is an odd number, ceil the advance. To do this, use

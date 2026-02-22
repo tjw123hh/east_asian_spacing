@@ -235,19 +235,21 @@ class Builder(object):
                             type=int,
                             default=1,
                             help="comment level for the glyph list")
-        parser.add_argument("-l",
-                            "--language",
-                            help="This is the legacy version of `-L/-languages`."
-                            " language if the font is language-specific,"
-                            " or a comma separated list of languages"
-                            " for a font collection (TTC)")
-        parser.add_argument("-L",
-                            "--languages",
-                            help="language or a comma separated list of languages"
-                            " for the font."
-                            " For a font collection (TTC), use a comma separated"
-                            " list of languages per font, with fonts separated by"
-                            " semicolons (e.g. 'JAN,ZHS;ZHT,ZHH')")
+        parser.add_argument(
+            "-l",
+            "--language",
+            help="This is the legacy version of `-L/-languages`."
+            " language if the font is language-specific,"
+            " or a comma separated list of languages"
+            " for a font collection (TTC)")
+        parser.add_argument(
+            "-L",
+            "--languages",
+            help="language or a comma separated list of languages"
+            " for the font."
+            " For a font collection (TTC), use a comma separated"
+            " list of languages per font, with fonts separated by"
+            " semicolons (e.g. 'JAN,ZHS;ZHT,ZHH')")
         parser.add_argument("--no-monospace",
                             action="store_true",
                             help="Skip ASCII-monospace fonts")
@@ -289,9 +291,8 @@ class Builder(object):
                 assert ';' not in args.language, "Use `-L` instead of `-l` to use the new syntax."
                 args.languages = args.language.replace(',', ';')
             if font.is_collection:
-                config = Config.for_collection(font,
-                                               languages=args.languages,
-                                               indices=args.index)
+                config = Config.for_collection(
+                    font, list_of_languages=args.languages, indices=args.index)
             else:
                 config = Config.default
                 if args.languages:
