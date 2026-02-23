@@ -108,9 +108,9 @@ class Config(object):
         """Returns a copy with the specified languages."""
         if isinstance(languages, str):
             languages = languages.split(",")
-        languages = {language for language in languages if language}
-        assert languages is None or all(
-            language in ["JAN", "ZHS", "ZHT", "ZHH"] for language in languages)
+        if languages is not None:
+            languages = {stripped for language in languages if (stripped := language.strip())}
+            assert languages <= {"JAN", "ZHS", "ZHT", "ZHH"}
         if languages == self.languages:
             return self
         clone = self.clone()
