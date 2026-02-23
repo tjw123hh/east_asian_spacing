@@ -204,7 +204,8 @@ class GlyphSets(object):
         if not await self.ensure_fullwidth_advance(font, config):
             logger.warning('Skipped because proportional CJK: "%s"', font)
             return
-
+        if not config.languages:
+            config = config.for_languages({"JAN", "ZHS", "ZHT", "ZHH"})
         coros = (self.by_language(font, config, language)
                  for language in config.languages)
         results = await asyncio.gather(*coros)

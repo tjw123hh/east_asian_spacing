@@ -77,14 +77,14 @@ class Config(object):
         # Prefer Typographic Family name (16) if the font has it.
         # Otherwise fallback to Font Family name (1).
         # https://docs.microsoft.com/en-us/typography/opentype/spec/name#name-ids
-        default_languages = self.languages or {
-            tag[:3]
-            for script, tag in font.script_and_langsys_tags
-            if script == 'hani' and tag in {"JAN ", "ZHS ", "ZHT ", "ZHH "}
-        } or {"JAN", "ZHS", "ZHT", "ZHH"}
+        # It set the languages to the font's default if it is not set yet.
         name = font.debug_name(16, 1)
-        return self.for_font_name(
-            name, font.is_vertical).with_languages(default_languages)
+        result = self.for_font_name(name, font.is_vertical)
+        if not result:
+            return None
+        if not result.languages:
+            result = result.with_languages(font.languages)
+        return result
 
     def for_font_name(self, name, is_vertical):
         # Noto has ASCII-mono vaiations. It is intended for code and grid-like
@@ -107,10 +107,12 @@ class Config(object):
     def with_languages(self, languages):
         """Returns a copy with the specified languages."""
         if isinstance(languages, str):
-            languages = languages.split(",")
-        if languages is not None:
-            languages = {stripped for language in languages if (stripped := language.strip())}
-            assert languages <= {"JAN", "ZHS", "ZHT", "ZHH"}
+            languages = {
+                stripped
+                for language in languages.split(",")
+                if (stripped := language.strip())
+            }
+        assert not languages or languages <= {"JAN", "ZHS", "ZHT", "ZHH"}
         if languages == self.languages:
             return self
         clone = self.clone()

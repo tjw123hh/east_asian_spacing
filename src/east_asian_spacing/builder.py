@@ -250,9 +250,10 @@ class Builder(object):
             " For a font collection (TTC), use a comma separated"
             " list of languages per font, with fonts separated by"
             " semicolons (e.g. 'JAN,ZHS;ZHT,ZHH')")
-        parser.add_argument("--skip-ink-bounds",
-                            action="store_true",
-                            help="disable ink bounds check (Config.use_ink_bounds)")
+        parser.add_argument(
+            "--skip-ink-bounds",
+            action="store_true",
+            help="disable ink bounds check (Config.use_ink_bounds)")
         parser.add_argument("--no-monospace",
                             action="store_true",
                             help="Skip ASCII-monospace fonts")

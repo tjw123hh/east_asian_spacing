@@ -336,6 +336,14 @@ class Font(object):
             for lang_sys in script_record.Script.LangSysRecord:
                 yield (script_tag, lang_sys.LangSysTag)
 
+    @property
+    def languages(self):
+        return {
+            tag[:3]
+            for script, tag in self.script_and_langsys_tags
+            if script == 'hani' and tag in {"JAN ", "ZHS ", "ZHT ", "ZHH "}
+        } or None
+
     def raise_require_language(self):
         raise AssertionError(
             "Need to specify the language for this font. " +
