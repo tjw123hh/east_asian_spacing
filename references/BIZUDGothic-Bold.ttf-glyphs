@@ -40,18 +40,18 @@
 104 # U+FF1B ；
 # space
 97 # U+3000 　
+# na_left
+11 # U+0029 )
+63 # U+005D ]
+105 # U+FF1F ？
+106 # U+FF01 ！
+12420 # U+FF63 ｣
+# na_right
+10 # U+0028 (
+61 # U+005B [
+12419 # U+FF62 ｢
 # filtered
-# 0 U+301B 〛
-# 0 U+301E 〞
-# 0 U+301A 〚
-# 10 U+0028 (
-# 11 U+0029 )
-# 61 U+005B [
-# 63 U+005D ]
-# 105 U+FF1F ？
-# 106 U+FF01 ！
-# 12419 U+FF62 ｢
-# 12420 U+FF63 ｣
+
 # vertical.left
 11951 # U+3001 、
 11952 # U+3002 。
@@ -91,10 +91,13 @@
 12028 # U+FF1A ：
 # vertical.space
 97 # U+3000 　
+# vertical.na_left
+11 # U+0029 )
+63 # U+005D ]
+12420 # U+FF63 ｣
+# vertical.na_right
+10 # U+0028 (
+61 # U+005B [
+12419 # U+FF62 ｢
 # vertical.filtered
-# 0 U+301B 〛
-# 0 U+301E 〞
-# 0 U+301A 〚
-# 104 U+FF1B ；
-# 136 U+201C “
-# 137 U+201D ”
+

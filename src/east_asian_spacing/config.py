@@ -80,8 +80,8 @@ class Config(object):
         default_languages = self.languages or {
             tag[:3]
             for script, tag in font.script_and_langsys_tags
-            if script == 'hani' and tag in ["JAN ", "ZHS ", "ZHT ", "ZHH "]
-        } or [None]
+            if script == 'hani' and tag in {"JAN ", "ZHS ", "ZHT ", "ZHH "}
+        } or {"JAN", "ZHS", "ZHT", "ZHH"}
         name = font.debug_name(16, 1)
         return self.for_font_name(
             name, font.is_vertical).with_languages(default_languages)

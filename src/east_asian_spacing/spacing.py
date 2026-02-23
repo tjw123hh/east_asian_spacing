@@ -61,7 +61,14 @@ class GlyphSets(object):
         self._root_font = None
 
         # For debug/font analysis purpose, keeps filtered `GlyphData`.
+        # It may contain extra glyphs (which are only filtered in one language, etc.).
         self._filtered = GlyphDataSet()
+
+    @property
+    def filtered(self):
+        for glyphs in self._glyph_data_sets:
+            self._filtered -= glyphs
+        return self._filtered
 
     def assert_font(self, font):
         if self._root_font:
@@ -111,31 +118,33 @@ class GlyphSets(object):
 
     def save_glyphs(self, output, prefix='', separator='\n', comment=0):
 
-        def str_from_glyph(glyph: GlyphData, texts: Set[str]):
-            if not comment:
-                return str(glyph.glyph_id)
-            if comment <= 1:
+        def comment_from_glyph(glyph: GlyphData,
+                               texts: Set[str],
+                               prefix=' # '):
+            if comment == 0:
+                return ''
+            elif comment == 1:
                 comment_str = ', '.join(f'U+{ord(t):04X} {t}'
-                                        for t in sorted(texts) if t)
+                                        for t in sorted(texts))
             else:
                 comment_str = ', '.join(f'{glyph} U+{ord(t):04X} {t}'
-                                        for t in sorted(texts) if t)
-            return f'{glyph.glyph_id} # {comment_str}' if comment_str else str(
-                glyph.glyph_id)
+                                        for t in sorted(texts))
+            return prefix + comment_str if comment_str else ''
 
         for name, glyph_data_set in self._name_and_glyph_data_sets:
             output.write(f'# {prefix}{name}\n')
             glyph_strs = (
-                str_from_glyph(g, glyph_data_set.get_texts(g))
+                f"{g.glyph_id}{comment_from_glyph(g, glyph_data_set.get_texts(g))}"
                 for g in sorted(glyph_data_set, key=lambda g: g.glyph_id))
             output.write(separator.join(glyph_strs))
             output.write('\n')
 
         if comment:
             output.write(f'# {prefix}filtered\n')
-            filtered_strs = (
-                f'# {str_from_glyph(g, self._filtered.get_texts(g))}'
-                for g in sorted(self._filtered, key=lambda g: g.glyph_id))
+            # yapf cannot handle this correctly. See https://github.com/google/yapf/issues/1136.
+            # yapf: disable
+            filtered_strs = (f'# {g.glyph_id}{comment_from_glyph(g, self._filtered.get_texts(g), prefix=' ')}' for g in sorted(self.filtered, key=lambda g: g.glyph_id))
+            # yapf: enable
             output.write(separator.join(filtered_strs))
             output.write('\n')
 
@@ -167,11 +176,9 @@ class GlyphSets(object):
         self.left.ifilter_ink_part(InkPart.LEFT, self.na_left)
         self.right.ifilter_ink_part(InkPart.RIGHT, self.na_right)
         self.middle.ifilter_ink_part(InkPart.MIDDLE, self._filtered)
-        filtered = self.na_left | self.na_right
         self.na_left -= self.middle
         self.na_right -= self.middle
-        filtered -= self.na_left | self.na_right
-        self._filtered |= filtered
+        self._filtered |= self.middle
 
     def ifilter_fullwidth(self, font: Font):
         em = font.fullwidth_advance
